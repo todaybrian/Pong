@@ -19,7 +19,6 @@ public class GameFrame extends JFrame {
         setVisible(true); //makes window visible to user
         setLocationRelativeTo(null);//set window in middle of screen
 
-        requestFocus(); //Make window the active window
     }
 
 
