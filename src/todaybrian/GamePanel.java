@@ -15,6 +15,8 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     public Image image;
     public Graphics2D g2d;
 
+    // Main Menu
+    private static final String MAIN_MENU_IMAGE = "src/assets/main_menu.png";
     private boolean main_menu = true;
 
     public GamePanel(){
@@ -27,21 +29,18 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         gameThread.start();
     }
 
-
+    //paint is a method in java.awt library that we are overriding. It is a special method - it is called automatically in the background in order to update what appears in the window. You NEVER call paint() yourself
     public void paint(Graphics g){
-        image = createImage(GAME_WIDTH, GAME_HEIGHT);
+        //we are using "double buffering" here - if we draw images directly onto the screen, it takes time and the human eye can actually notice flashes of lag as each pixel on the screen is drawn one at a time. Instead, we are going to draw images OFF the screen (outside dimensions of the frame), then simply move the image on screen as needed.
+        image = createImage(GAME_WIDTH, GAME_HEIGHT); //draw off screen
         g2d = (Graphics2D) image.getGraphics();
 
         g2d.setColor(Color.WHITE);
 
         //main menu
         if(main_menu){
-            Font font = new Font("Arial", Font.BOLD, 30);
-            FontMetrics metrics = g2d.getFontMetrics(font);
-
-            g2d.setFont(font);
-            String text = "Press [space] to start";
-            g2d.drawString("Press [space] to start", (GAME_WIDTH - metrics.stringWidth(text))/2, GAME_HEIGHT/2);
+            ImageIcon main_menu_image = new ImageIcon(MAIN_MENU_IMAGE);
+            g2d.drawImage(main_menu_image.getImage(), 0, 0, null);
         }
 
         //top and bottom lines
@@ -81,10 +80,6 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         }
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -95,10 +90,14 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         }
     }
 
+    //if a key is released,
     @Override
     public void keyReleased(KeyEvent e) {
 
     }
 
+    //left empty because we don't need it; must be here because it is required to be overridded by the KeyListener interface
+    @Override
+    public void keyTyped(KeyEvent e) {}
 
 }
