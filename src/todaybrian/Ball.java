@@ -4,12 +4,21 @@ import java.awt.*;
 
 public class Ball extends Rectangle {
 
-    public int xVelocity;
-    public int yVelocity;
     public static final int BALL_DIAMETER = 20;
 
-    Ball(){
+    public int xVelocity;
+    public int yVelocity;
 
+    Ball(int x, int y){
+        super(x, y, BALL_DIAMETER, BALL_DIAMETER);
+    }
+
+    public void setXVelocity(int xVelocity) {
+        this.xVelocity = xVelocity;
+    }
+
+    public void setYVelocity(int yVelocity) {
+        this.yVelocity = yVelocity;
     }
 
     public void move(){
