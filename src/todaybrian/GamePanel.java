@@ -18,15 +18,21 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     public Paddle player1Paddle;
     public Paddle player2Paddle;
     public Ball ball;
+    public Scoreboard scoreboard;
 
     // Main Menu
     private static final String MAIN_MENU_IMAGE = "src/assets/main_menu.png";
     private boolean main_menu = true;
 
+    // Pause After Score
+    private static final String PAUSE_AFTER_SCORE_IMAGE = "src/assets/pause_after_score.png";
+    private boolean pause_after_score = false;
+
     public GamePanel(){
         player1Paddle = new Paddle(5, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_W, KeyEvent.VK_S);
         player2Paddle = new Paddle(GAME_WIDTH-5-Paddle.PADDLE_WIDTH, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_UP, KeyEvent.VK_DOWN);
         ball = new Ball(GAME_WIDTH/2 - Ball.BALL_DIAMETER/2, GAME_HEIGHT/2 - Ball.BALL_DIAMETER/2);
+        scoreboard = new Scoreboard();
 
         setFocusable(true);
         addKeyListener(this);
@@ -50,6 +56,10 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
             ImageIcon main_menu_image = new ImageIcon(MAIN_MENU_IMAGE);
             g2d.drawImage(main_menu_image.getImage(), 0, 0, null);
         }
+        if(pause_after_score){
+            ImageIcon pause_after_score_image = new ImageIcon(PAUSE_AFTER_SCORE_IMAGE);
+            g2d.drawImage(pause_after_score_image.getImage(), 0, 0, null);
+        }
 
         draw(g2d);
 
@@ -63,7 +73,8 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     public void draw(Graphics g){
         player1Paddle.draw(g);
         player2Paddle.draw(g);
-        if(!main_menu){
+        scoreboard.draw(g);
+        if(!main_menu && !pause_after_score){
             ball.draw(g);
         }
     }
@@ -84,10 +95,14 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         //check for collision with paddles
         if(ball.intersects(player1Paddle)){
             ball.setXVelocity(Math.abs(ball.xVelocity));
+
+            ball.yVelocity += player1Paddle.yVelocity/2;
         }
 
         if(ball.intersects(player2Paddle)){
             ball.setXVelocity(-Math.abs(ball.xVelocity));
+
+            ball.yVelocity += player2Paddle.yVelocity/2;
         }
 
         //stop paddles from going off screen
@@ -103,6 +118,17 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         }
         if(player2Paddle.y + Paddle.PADDLE_HEIGHT > GAME_HEIGHT){
             player2Paddle.y = GAME_HEIGHT - Paddle.PADDLE_HEIGHT;
+        }
+
+        //scoreboard
+        if(ball.x < 0){
+            scoreboard.addPoint(1);
+            pause_after_score = true;
+            ball.reset();
+        } else if(ball.x > GAME_WIDTH - Ball.BALL_DIAMETER){
+            scoreboard.addPoint(2);
+            pause_after_score = true;
+            ball.reset();
         }
     }
 
@@ -134,11 +160,12 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(main_menu) {
+        if(main_menu || pause_after_score) {
             if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                 main_menu = false;
-                ball.setXVelocity(5);
-                ball.setYVelocity(5);
+                pause_after_score = false;
+                ball.reset();
+                ball.startBall();
             }
         }
         player1Paddle.keyPressed(e);

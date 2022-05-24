@@ -5,6 +5,7 @@ import java.awt.*;
 public class Ball extends Rectangle {
 
     public static final int BALL_DIAMETER = 20;
+    public static final int INIT_BALL_SPEED = 5;
 
     public int xVelocity;
     public int yVelocity;
@@ -24,6 +25,22 @@ public class Ball extends Rectangle {
     public void move(){
         y += yVelocity;
         x += xVelocity;
+    }
+
+    public void reset(){
+        x = GamePanel.GAME_WIDTH / 2 - BALL_DIAMETER / 2;
+        y = GamePanel.GAME_HEIGHT / 2 - BALL_DIAMETER / 2;
+
+        xVelocity = 0;
+        yVelocity = 0;
+    }
+
+    public void startBall(){
+        if(Math.random() < 0.5){
+            xVelocity = INIT_BALL_SPEED;
+        } else {
+            xVelocity = -INIT_BALL_SPEED;
+        }
     }
 
     //called frequently from the GamePanel class
