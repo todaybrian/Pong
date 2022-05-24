@@ -18,6 +18,10 @@ public class Scoreboard {
         }
     }
 
+    public void reset(){
+        player1Score = 0;
+        player2Score = 0;
+    }
     public void draw(Graphics g){
         g.setFont(new Font("Inconsolata", Font.BOLD, 40));
         FontMetrics fm = g.getFontMetrics();

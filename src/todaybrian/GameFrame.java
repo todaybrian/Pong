@@ -20,6 +20,4 @@ public class GameFrame extends JFrame {
         setLocationRelativeTo(null);//set window in middle of screen
 
     }
-
-
 }
