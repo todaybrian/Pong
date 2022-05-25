@@ -39,16 +39,29 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     private boolean game_over = false;
     private boolean player_1_wins = false;
 
+    //Sound System
+    private SoundPlayer soundPlayer;
+
+    //Sounds Files
+    private static final String BOUNCE_FILE = "src/assets/bounce.wav";
+    private static final String START_FILE = "src/assets/start_game.wav";
+    private static final String WIN_MATCH_FILE = "src/assets/win_sound.wav";
+    private static final String END_FILE = "src/assets/end_music.wav";
+
     public GamePanel(){
-        player1Paddle = new Paddle(5, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_W, KeyEvent.VK_S);
-        player2Paddle = new Paddle(GAME_WIDTH-5-Paddle.PADDLE_WIDTH, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_UP, KeyEvent.VK_DOWN);
+        player1Paddle = new Paddle(8, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_W, KeyEvent.VK_S);
+        player2Paddle = new Paddle(GAME_WIDTH-8-Paddle.PADDLE_WIDTH, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_UP, KeyEvent.VK_DOWN);
         ball = new Ball(GAME_WIDTH/2 - Ball.BALL_DIAMETER/2, GAME_HEIGHT/2 - Ball.BALL_DIAMETER/2);
         scoreboard = new Scoreboard();
+
+        soundPlayer = new SoundPlayer();
 
         setFocusable(true);
         addKeyListener(this);
         setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
         requestFocus(); //Make window the active window
+
+        soundPlayer.playSound(BOUNCE_FILE); //Play first sound to avoid delay
 
         gameThread = new Thread(this);
         gameThread.start();
@@ -109,8 +122,10 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     //handles all collision detection and responds accordingly
     public void checkCollision() {
         //check for collision with top and bottom walls
-        if(ball.y < 0 || ball.y > GAME_HEIGHT - Ball.BALL_DIAMETER){
-            ball.yVelocity *= -1;
+        if(ball.y < 0 ){
+            ball.yVelocity = Math.abs(ball.yVelocity);;
+        } else if (ball.y > GAME_HEIGHT - Ball.BALL_DIAMETER){
+            ball.yVelocity = -Math.abs(ball.yVelocity);
         }
 
         //check for collision with paddles
@@ -119,7 +134,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
             ball.yVelocity += player1Paddle.yVelocity/2;
 
-            playSound("src/assets/boing.wav");
+            soundPlayer.playSound(BOUNCE_FILE);
         }
 
         if(ball.intersects(player2Paddle)){
@@ -127,7 +142,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
             ball.yVelocity += player2Paddle.yVelocity/2;
 
-            playSound("src/assets/boing.wav");
+            soundPlayer.playSound(BOUNCE_FILE);
         }
 
         //stop paddles from going off screen
@@ -147,20 +162,26 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
         //scoreboard
         if(ball.x < 0){
-            scoreboard.addPoint(1);
-            pause_after_score = true;
-            ball.reset();
-            if(scoreboard.getPlayer1Score() == 5){
-                player_1_wins = true;
-                game_over = true;
-            }
-        } else if(ball.x > GAME_WIDTH - Ball.BALL_DIAMETER){
             scoreboard.addPoint(2);
             pause_after_score = true;
             ball.reset();
             if(scoreboard.getPlayer2Score() == 5){
                 player_1_wins = false;
                 game_over = true;
+                soundPlayer.playSound(END_FILE);
+            } else{
+                soundPlayer.playSound(WIN_MATCH_FILE);
+            }
+        } else if(ball.x > GAME_WIDTH - Ball.BALL_DIAMETER){
+            scoreboard.addPoint(1);
+            pause_after_score = true;
+            ball.reset();
+            if(scoreboard.getPlayer1Score() == 5){
+                player_1_wins = true;
+                game_over = true;
+                soundPlayer.playSound(END_FILE);
+            } else{
+                soundPlayer.playSound(WIN_MATCH_FILE);
             }
         }
     }
@@ -199,10 +220,15 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
                 game_over = false;
                 scoreboard.reset();
                 ball.reset();
+
+                soundPlayer.stopSound();
             }
         }
         if(main_menu || pause_after_score) {
             if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                if(main_menu){
+                    soundPlayer.playSound(START_FILE);
+                }
                 main_menu = false;
                 pause_after_score = false;
                 ball.reset();
@@ -224,16 +250,4 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     @Override
     public void keyTyped(KeyEvent e) {}
 
-    public static void playSound(String filename) {
-        try {
-            File file = new File(filename);
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
-            DataLine.Info info = new DataLine.Info(Clip.class, audioInputStream.getFormat());
-            Clip clip = (Clip) AudioSystem.getLine(info);
-            clip.open(audioInputStream);
-            clip.start();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
 }
