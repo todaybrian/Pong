@@ -5,7 +5,7 @@ import java.awt.*;
 public class Ball extends Rectangle {
 
     public static final int BALL_DIAMETER = 20;
-    public static final int INIT_BALL_SPEED = 5;
+    public static final int INIT_BALL_SPEED = 6;
 
     public int xVelocity;
     public int yVelocity;
@@ -36,12 +36,10 @@ public class Ball extends Rectangle {
     }
 
     public void startBall(){
-        int additionalSpeed = (Main.gameFrame.gamePanel.scoreboard.getPlayer1Score() + Main.gameFrame.gamePanel.scoreboard.getPlayer2Score())/2;
-
         if(Math.random() < 0.5){
-            xVelocity = INIT_BALL_SPEED+additionalSpeed;
+            xVelocity = INIT_BALL_SPEED;
         } else {
-            xVelocity = -INIT_BALL_SPEED - additionalSpeed;
+            xVelocity = -INIT_BALL_SPEED;
         }
     }
 

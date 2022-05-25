@@ -228,18 +228,18 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         //Game over screen
-        if(game_over){
+        if(game_over) {
             //Press space to restart game
-            if(e.getKeyCode() == KeyEvent.VK_SPACE){
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                 main_menu = true; // go to main menu
+                pause_after_score = false;
                 game_over = false; // no longer game over
 
                 scoreboard.reset(); //Reset scoreboard
 
                 soundPlayer.stopSound(); //Stop game ending music
             }
-        }
-        if(main_menu || pause_after_score) {
+        } else if(main_menu || pause_after_score) {
             if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                 if(main_menu){
                     soundPlayer.playSound(START_FILE);
