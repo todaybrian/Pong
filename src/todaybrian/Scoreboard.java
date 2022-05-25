@@ -38,7 +38,9 @@ public class Scoreboard {
         g.setFont(new Font("Inconsolata", Font.BOLD, 40));
         FontMetrics fm = g.getFontMetrics();
 
+        //Draw the scores
         g.drawString(player1Score + "", GamePanel.GAME_WIDTH/2-fm.stringWidth(String.valueOf(player1Score))-50, 40);
+
         g.drawString(player2Score + "", GamePanel.GAME_WIDTH/2+50, 40);
     }
 }

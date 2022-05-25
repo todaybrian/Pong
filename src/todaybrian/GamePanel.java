@@ -49,6 +49,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     private static final String END_FILE = "src/assets/end_music.wav";
 
     public GamePanel(){
+        //Init objects in game
         player1Paddle = new Paddle(8, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_W, KeyEvent.VK_S);
         player2Paddle = new Paddle(GAME_WIDTH-8-Paddle.PADDLE_WIDTH, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_UP, KeyEvent.VK_DOWN);
         ball = new Ball(GAME_WIDTH/2 - Ball.BALL_DIAMETER/2, GAME_HEIGHT/2 - Ball.BALL_DIAMETER/2);
@@ -80,10 +81,14 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
             ImageIcon main_menu_image = new ImageIcon(MAIN_MENU_IMAGE);
             g2d.drawImage(main_menu_image.getImage(), 0, 0, null);
         }
+
+        //pause after score until players are ready
         if(pause_after_score){
             ImageIcon pause_after_score_image = new ImageIcon(PAUSE_AFTER_SCORE_IMAGE);
             g2d.drawImage(pause_after_score_image.getImage(), 0, 0, null);
         }
+
+        //Game over
         if(game_over){
             if(player_1_wins){
                 ImageIcon player_1_wins_image = new ImageIcon(PLAYER_1_WINS_IMAGE);
@@ -122,66 +127,74 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     //handles all collision detection and responds accordingly
     public void checkCollision() {
         //check for collision with top and bottom walls
-        if(ball.y < 0 ){
-            ball.yVelocity = Math.abs(ball.yVelocity);;
-        } else if (ball.y > GAME_HEIGHT - Ball.BALL_DIAMETER){
+        //collisions are done like this to avoid the ball from bouncing off the wall multiple times
+        if(ball.y < 0){ //top wall
+            ball.yVelocity = Math.abs(ball.yVelocity);
+        } else if (ball.y > GAME_HEIGHT - Ball.BALL_DIAMETER){ //bottom wall
             ball.yVelocity = -Math.abs(ball.yVelocity);
         }
 
         //check for collision with paddles
+        //collisions are done like this to avoid the ball from bouncing off the paddle multiple times
         if(ball.intersects(player1Paddle)){
-            ball.setXVelocity(Math.abs(ball.xVelocity));
+            ball.setXVelocity(Math.abs(ball.xVelocity)); //Set going to the right
 
-            ball.yVelocity += player1Paddle.yVelocity/2;
+            ball.yVelocity += player1Paddle.yVelocity/2; //Add y velocity based on player paddle's y velocity
 
-            soundPlayer.playSound(BOUNCE_FILE);
-        }
+            soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
+        } else if(ball.intersects(player2Paddle)){
+            ball.setXVelocity(-Math.abs(ball.xVelocity)); //Set going to the left
 
-        if(ball.intersects(player2Paddle)){
-            ball.setXVelocity(-Math.abs(ball.xVelocity));
+            ball.yVelocity += player2Paddle.yVelocity/2; //Add y velocity based on player paddle's y velocity
 
-            ball.yVelocity += player2Paddle.yVelocity/2;
-
-            soundPlayer.playSound(BOUNCE_FILE);
+            soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
         }
 
         //stop paddles from going off screen
-        if(player1Paddle.y < 0){
+        if(player1Paddle.y < 0){ //Player 1 paddle is above the screen
             player1Paddle.y = 0;
         }
-        if(player1Paddle.y + Paddle.PADDLE_HEIGHT > GAME_HEIGHT){
+        if(player1Paddle.y + Paddle.PADDLE_HEIGHT > GAME_HEIGHT){ //Player 1 paddle is below the screen
             player1Paddle.y = GAME_HEIGHT - Paddle.PADDLE_HEIGHT;
         }
 
-        if(player2Paddle.y < 0){
+        if(player2Paddle.y < 0){ //Player 2 paddle is above the screen
             player2Paddle.y = 0;
         }
-        if(player2Paddle.y + Paddle.PADDLE_HEIGHT > GAME_HEIGHT){
+        if(player2Paddle.y + Paddle.PADDLE_HEIGHT > GAME_HEIGHT){ //Player 2 paddle is below the screen
             player2Paddle.y = GAME_HEIGHT - Paddle.PADDLE_HEIGHT;
         }
 
-        //scoreboard
-        if(ball.x < 0){
-            scoreboard.addPoint(2);
-            pause_after_score = true;
-            ball.reset();
-            if(scoreboard.getPlayer2Score() == 5){
-                player_1_wins = false;
+        //Check for collision with walls, which means a player has scored
+        if(ball.x < 0){ //Gone off the left side of screen
+
+            scoreboard.addPoint(2); //Player 2 gets a point
+            pause_after_score = true; //Pause the game until players are ready
+
+            ball.reset(); //Reset position of ball
+
+            if(scoreboard.getPlayer2Score() == 5){ //Check if player 2 has won
+                player_1_wins = false; //Player 2 wins
+
                 game_over = true;
+
                 soundPlayer.playSound(END_FILE);
             } else{
-                soundPlayer.playSound(WIN_MATCH_FILE);
+                soundPlayer.playSound(WIN_MATCH_FILE); //otherwise play sound of match win
             }
         } else if(ball.x > GAME_WIDTH - Ball.BALL_DIAMETER){
-            scoreboard.addPoint(1);
-            pause_after_score = true;
-            ball.reset();
-            if(scoreboard.getPlayer1Score() == 5){
-                player_1_wins = true;
+            scoreboard.addPoint(1); //Player 1 gets a point
+            pause_after_score = true; //Pause the game until players are ready
+
+            ball.reset(); //Reset position of ball
+            if(scoreboard.getPlayer1Score() == 5){ //Check if player 1 has won
+                player_1_wins = true; //Player 1 wins
+
                 game_over = true;
+
                 soundPlayer.playSound(END_FILE);
             } else{
-                soundPlayer.playSound(WIN_MATCH_FILE);
+                soundPlayer.playSound(WIN_MATCH_FILE); //otherwise play sound of match win
             }
         }
     }
@@ -214,14 +227,16 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        //Game over screen
         if(game_over){
+            //Press space to restart game
             if(e.getKeyCode() == KeyEvent.VK_SPACE){
-                main_menu = true;
-                game_over = false;
-                scoreboard.reset();
-                ball.reset();
+                main_menu = true; // go to main menu
+                game_over = false; // no longer game over
 
-                soundPlayer.stopSound();
+                scoreboard.reset(); //Reset scoreboard
+
+                soundPlayer.stopSound(); //Stop game ending music
             }
         }
         if(main_menu || pause_after_score) {
@@ -229,8 +244,10 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
                 if(main_menu){
                     soundPlayer.playSound(START_FILE);
                 }
-                main_menu = false;
-                pause_after_score = false;
+                main_menu = false; // no longer in main menu
+                pause_after_score = false; // no longer in pause after score screen, we are in game
+
+                //reset and start the ball
                 ball.reset();
                 ball.startBall();
             }

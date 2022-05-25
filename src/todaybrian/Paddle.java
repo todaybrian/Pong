@@ -17,6 +17,7 @@ public class Paddle extends Rectangle {
     public Paddle(int x, int y, int upKey, int downKey) {
         super(x, y, PADDLE_WIDTH, PADDLE_HEIGHT);
 
+        //Set the keys to move the paddle
         this.upKey = upKey;
         this.downKey = downKey;
     }

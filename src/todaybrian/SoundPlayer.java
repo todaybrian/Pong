@@ -7,6 +7,7 @@ import javax.sound.sampled.DataLine;
 import java.io.File;
 
 public class SoundPlayer {
+    //Sound System Variables
     private Clip clip;
 
     public SoundPlayer(){
@@ -17,6 +18,7 @@ public class SoundPlayer {
         }
     }
 
+    //Play a sound based on file path
     public void playSound(String fileName){
         try {
             File file = new File(fileName);
@@ -30,6 +32,7 @@ public class SoundPlayer {
         clip.start();
     }
 
+    //Stop a sound
     public void stopSound(){
         clip.stop();
     }
