@@ -36,10 +36,12 @@ public class Ball extends Rectangle {
     }
 
     public void startBall(){
+        int additionalSpeed = (Main.gameFrame.gamePanel.scoreboard.getPlayer1Score() + Main.gameFrame.gamePanel.scoreboard.getPlayer2Score())/2;
+
         if(Math.random() < 0.5){
-            xVelocity = INIT_BALL_SPEED;
+            xVelocity = INIT_BALL_SPEED+additionalSpeed;
         } else {
-            xVelocity = -INIT_BALL_SPEED;
+            xVelocity = -INIT_BALL_SPEED - additionalSpeed;
         }
     }
 

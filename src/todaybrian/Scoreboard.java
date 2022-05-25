@@ -10,6 +10,7 @@ public class Scoreboard {
         player2Score = 0;
     }
 
+    //Add point to player 1 or player 2
     public void addPoint(int player) {
         if (player == 1) {
             player1Score++;
@@ -18,9 +19,20 @@ public class Scoreboard {
         }
     }
 
+    //Reset the scores to 0
     public void reset(){
         player1Score = 0;
         player2Score = 0;
+    }
+
+    //Get the score of player 1
+    public int getPlayer1Score() {
+        return player1Score;
+    }
+
+    //Get the score of player 2
+    public int getPlayer2Score() {
+        return player2Score;
     }
     public void draw(Graphics g){
         g.setFont(new Font("Inconsolata", Font.BOLD, 40));

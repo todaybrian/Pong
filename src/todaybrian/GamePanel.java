@@ -1,9 +1,14 @@
 package todaybrian;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
 
 public class GamePanel extends JPanel implements Runnable, KeyListener {
 
@@ -27,6 +32,12 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     // Pause After Score
     private static final String PAUSE_AFTER_SCORE_IMAGE = "src/assets/pause_after_score.png";
     private boolean pause_after_score = false;
+
+    // Game Over
+    private static final String PLAYER_1_WINS_IMAGE = "src/assets/player_1_wins.png";
+    private static final String PLAYER_2_WINS_IMAGE = "src/assets/player_2_wins.png";
+    private boolean game_over = false;
+    private boolean player_1_wins = false;
 
     public GamePanel(){
         player1Paddle = new Paddle(5, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_W, KeyEvent.VK_S);
@@ -60,6 +71,16 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
             ImageIcon pause_after_score_image = new ImageIcon(PAUSE_AFTER_SCORE_IMAGE);
             g2d.drawImage(pause_after_score_image.getImage(), 0, 0, null);
         }
+        if(game_over){
+            if(player_1_wins){
+                ImageIcon player_1_wins_image = new ImageIcon(PLAYER_1_WINS_IMAGE);
+                g2d.drawImage(player_1_wins_image.getImage(), 0, 0, null);
+            }
+            else{
+                ImageIcon player_2_wins_image = new ImageIcon(PLAYER_2_WINS_IMAGE);
+                g2d.drawImage(player_2_wins_image.getImage(), 0, 0, null);
+            }
+        }
 
         draw(g2d);
 
@@ -74,7 +95,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         player1Paddle.draw(g);
         player2Paddle.draw(g);
         scoreboard.draw(g);
-        if(!main_menu && !pause_after_score){
+        if(!main_menu && !pause_after_score && !game_over){
             ball.draw(g);
         }
     }
@@ -97,12 +118,16 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
             ball.setXVelocity(Math.abs(ball.xVelocity));
 
             ball.yVelocity += player1Paddle.yVelocity/2;
+
+            playSound("src/assets/boing.wav");
         }
 
         if(ball.intersects(player2Paddle)){
             ball.setXVelocity(-Math.abs(ball.xVelocity));
 
             ball.yVelocity += player2Paddle.yVelocity/2;
+
+            playSound("src/assets/boing.wav");
         }
 
         //stop paddles from going off screen
@@ -125,10 +150,18 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
             scoreboard.addPoint(1);
             pause_after_score = true;
             ball.reset();
+            if(scoreboard.getPlayer1Score() == 5){
+                player_1_wins = true;
+                game_over = true;
+            }
         } else if(ball.x > GAME_WIDTH - Ball.BALL_DIAMETER){
             scoreboard.addPoint(2);
             pause_after_score = true;
             ball.reset();
+            if(scoreboard.getPlayer2Score() == 5){
+                player_1_wins = false;
+                game_over = true;
+            }
         }
     }
 
@@ -160,6 +193,14 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        if(game_over){
+            if(e.getKeyCode() == KeyEvent.VK_SPACE){
+                main_menu = true;
+                game_over = false;
+                scoreboard.reset();
+                ball.reset();
+            }
+        }
         if(main_menu || pause_after_score) {
             if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                 main_menu = false;
@@ -182,4 +223,17 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     //left empty because we don't need it; must be here because it is required to be overridded by the KeyListener interface
     @Override
     public void keyTyped(KeyEvent e) {}
+
+    public static void playSound(String filename) {
+        try {
+            File file = new File(filename);
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
+            DataLine.Info info = new DataLine.Info(Clip.class, audioInputStream.getFormat());
+            Clip clip = (Clip) AudioSystem.getLine(info);
+            clip.open(audioInputStream);
+            clip.start();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 }
