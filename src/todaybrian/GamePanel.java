@@ -1,14 +1,9 @@
 package todaybrian;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.File;
 
 public class GamePanel extends JPanel implements Runnable, KeyListener {
 
@@ -130,8 +125,12 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         //collisions are done like this to avoid the ball from bouncing off the wall multiple times
         if(ball.y < 0){ //top wall
             ball.yVelocity = Math.abs(ball.yVelocity);
+
+            soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
         } else if (ball.y > GAME_HEIGHT - Ball.BALL_DIAMETER){ //bottom wall
             ball.yVelocity = -Math.abs(ball.yVelocity);
+
+            soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
         }
 
         //check for collision with paddles
