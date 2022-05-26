@@ -171,18 +171,18 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         if(ball.x < 0){ //Gone off the left side of screen
 
             scoreboard.addPoint(2); //Player 2 gets a point
-            pause_after_score = true; //Pause the game until players are ready
 
             ball.reset(); //Reset position of ball
 
             if(scoreboard.getPlayer2Score() == 5){ //Check if player 2 has won
                 player_1_wins = false; //Player 2 wins
 
-                game_over = true;
+                game_over = true; //Game over
 
                 soundPlayer.playSound(END_FILE);
             } else{
                 soundPlayer.playSound(WIN_MATCH_FILE); //otherwise play sound of match win
+                pause_after_score = true; //Pause the game until players are ready
             }
         } else if(ball.x > GAME_WIDTH - Ball.BALL_DIAMETER){
             scoreboard.addPoint(1); //Player 1 gets a point
@@ -192,11 +192,12 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
             if(scoreboard.getPlayer1Score() == 5){ //Check if player 1 has won
                 player_1_wins = true; //Player 1 wins
 
-                game_over = true;
+                game_over = true; //Game over
 
                 soundPlayer.playSound(END_FILE);
             } else{
                 soundPlayer.playSound(WIN_MATCH_FILE); //otherwise play sound of match win
+                pause_after_score = true; //Pause the game until players are ready
             }
         }
     }
@@ -206,7 +207,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     public void run() {
         //the CPU runs our game code too quickly - we need to slow it down! The following lines of code "force" the computer to get stuck in a loop for short intervals between calling other methods to update the screen.
         long lastTime = System.nanoTime();
-        double amountOfTicks = 60;
+        double amountOfTicks = 65;
         double ns = 1000000000/amountOfTicks;
         double delta = 0;
         long now;
