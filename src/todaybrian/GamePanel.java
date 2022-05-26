@@ -23,6 +23,9 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     public Ball ball;
     public Scoreboard scoreboard;
 
+    //Sound System
+    private SoundPlayer soundPlayer;
+
     // Main Menu
     private static final String MAIN_MENU_IMAGE = "src/assets/main_menu.png";
     private boolean main_menu = true;
@@ -37,10 +40,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     private boolean game_over = false;
     private boolean player_1_wins = false;
 
-    //Sound System
-    private SoundPlayer soundPlayer;
-
-    //Sounds Files
+    //Sound Files
     private static final String BOUNCE_FILE = "src/assets/bounce.wav";
     private static final String START_FILE = "src/assets/start_game.wav";
     private static final String WIN_MATCH_FILE = "src/assets/win_sound.wav";
