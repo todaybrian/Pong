@@ -1,3 +1,6 @@
+//Brian Yan
+//May 25, 2022
+//Game Frame class which creates window and starts the game
 package todaybrian;
 
 import javax.swing.*;
@@ -8,7 +11,7 @@ public class GameFrame extends JFrame {
     public GamePanel gamePanel;
 
     public GameFrame() {
-        gamePanel = new GamePanel();
+        gamePanel = new GamePanel(); //run GamePanel constructor
 
         add(gamePanel);
         setTitle("Pong!"); //set title for frame

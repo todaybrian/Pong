@@ -1,3 +1,6 @@
+//Brian Yan
+//May 25, 2022
+// Utility class for playing and stopping sounds
 package todaybrian;
 
 import javax.sound.sampled.AudioInputStream;
@@ -12,7 +15,7 @@ public class SoundPlayer {
 
     public SoundPlayer(){
         try {
-            clip = AudioSystem.getClip();
+            clip = AudioSystem.getClip(); //Initialize clip
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -21,15 +24,16 @@ public class SoundPlayer {
     //Play a sound based on file path
     public void playSound(String fileName){
         try {
-            File file = new File(fileName);
+            File file = new File(fileName); //Create a file object from the file path
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
             DataLine.Info info = new DataLine.Info(Clip.class, audioInputStream.getFormat());
+
             clip = (Clip) AudioSystem.getLine(info);
-            clip.open(audioInputStream);
+            clip.open(audioInputStream); //Open the clip
         }catch (Exception e){
             e.printStackTrace();
         }
-        clip.start();
+        clip.start(); //Start the clip
     }
 
     //Stop a sound

@@ -1,3 +1,6 @@
+//Brian Yan
+//May 25, 2022
+// GamePanel class which holds the game logic
 package todaybrian;
 
 import javax.swing.*;
@@ -45,20 +48,22 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
     public GamePanel(){
         //Init objects in game
-        player1Paddle = new Paddle(8, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_W, KeyEvent.VK_S);
-        player2Paddle = new Paddle(GAME_WIDTH-8-Paddle.PADDLE_WIDTH, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_UP, KeyEvent.VK_DOWN);
-        ball = new Ball(GAME_WIDTH/2 - Ball.BALL_DIAMETER/2, GAME_HEIGHT/2 - Ball.BALL_DIAMETER/2);
-        scoreboard = new Scoreboard();
+        player1Paddle = new Paddle(8, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_W, KeyEvent.VK_S); //Create Player 1's controlled paddle, set location to left side of screen
+        player2Paddle = new Paddle(GAME_WIDTH-8-Paddle.PADDLE_WIDTH, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_UP, KeyEvent.VK_DOWN); //Create Player 2's controlled paddle, set location to right side of screen
+        ball = new Ball(GAME_WIDTH/2 - Ball.BALL_DIAMETER/2, GAME_HEIGHT/2 - Ball.BALL_DIAMETER/2); //create a ball object at the center of the screen which will bounce off the paddles and walls
+        scoreboard = new Scoreboard(GAME_WIDTH); //start counting the score
 
-        soundPlayer = new SoundPlayer();
+        soundPlayer = new SoundPlayer(); //Sound System
 
-        setFocusable(true);
-        addKeyListener(this);
+        setFocusable(true); //make everything in this class appear on the screen
+        addKeyListener(this); //start listening for keyboard input
+
         setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
         requestFocus(); //Make window the active window
 
         soundPlayer.playSound(BOUNCE_FILE); //Play first sound to avoid delay
 
+        //make this class run at the same time as other classes (without this each class would "pause" while another class runs). By using threading we can remove lag, and also allows us to do features like display timers in real time!
         gameThread = new Thread(this);
         gameThread.start();
     }
@@ -71,48 +76,45 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
         g2d.setColor(Color.WHITE);
 
+        // MENUS
         //main menu
         if(main_menu){
             ImageIcon main_menu_image = new ImageIcon(MAIN_MENU_IMAGE);
-            g2d.drawImage(main_menu_image.getImage(), 0, 0, null);
-        }
-
-        //pause after score until players are ready
-        if(pause_after_score){
+            g2d.drawImage(main_menu_image.getImage(), 0, 0, null); //Draw the main menu image on screen
+        } else if(pause_after_score){//pause after score until players are ready
             ImageIcon pause_after_score_image = new ImageIcon(PAUSE_AFTER_SCORE_IMAGE);
-            g2d.drawImage(pause_after_score_image.getImage(), 0, 0, null);
-        }
-
-        //Game over
-        if(game_over){
+            g2d.drawImage(pause_after_score_image.getImage(), 0, 0, null); //Draw the pause after score image on screen
+        } else if(game_over){ //Game over
             if(player_1_wins){
                 ImageIcon player_1_wins_image = new ImageIcon(PLAYER_1_WINS_IMAGE);
-                g2d.drawImage(player_1_wins_image.getImage(), 0, 0, null);
-            }
-            else{
+                g2d.drawImage(player_1_wins_image.getImage(), 0, 0, null); //Draw the player 1 wins image on screen
+            }  else{
                 ImageIcon player_2_wins_image = new ImageIcon(PLAYER_2_WINS_IMAGE);
-                g2d.drawImage(player_2_wins_image.getImage(), 0, 0, null);
+                g2d.drawImage(player_2_wins_image.getImage(), 0, 0, null); //Draw the player 2 wins image on screen
             }
         }
 
-        draw(g2d);
+        draw(g2d); //update the positions of everything on the screen
 
         //dashed line in center
         g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0));
         g2d.drawLine(GAME_WIDTH/2, 0, GAME_WIDTH/2, GAME_HEIGHT);
 
-        g.drawImage(image, 0, 0, this);
+        g.drawImage(image, 0, 0, this); //redraw everything on the screen
     }
 
+    //call the draw methods in each class to update positions as things move
     public void draw(Graphics g){
         player1Paddle.draw(g);
         player2Paddle.draw(g);
         scoreboard.draw(g);
-        if(!main_menu && !pause_after_score && !game_over){
+        if(!main_menu && !pause_after_score && !game_over){ //Don't draw ball if there is a menu or game over
             ball.draw(g);
         }
     }
 
+    //call the move methods in other classes to update positions
+    //this method is constantly called from run(). By doing this, movements appear fluid and natural. If we take this out the movements appear sluggish and laggy
     public void move(){
         player1Paddle.move();
         player2Paddle.move();
@@ -135,13 +137,14 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
         //check for collision with paddles
         //collisions are done like this to avoid the ball from bouncing off the paddle multiple times
-        if(ball.intersects(player1Paddle)){
+        if(ball.intersects(player1Paddle)){ //Bounced of player 1's paddle
             ball.setXVelocity(Math.abs(ball.xVelocity)); //Set going to the right
 
             ball.yVelocity += player1Paddle.yVelocity/2; //Add y velocity based on player paddle's y velocity
 
             soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
-        } else if(ball.intersects(player2Paddle)){
+
+        } else if(ball.intersects(player2Paddle)){ //Bounced of player 2's paddle
             ball.setXVelocity(-Math.abs(ball.xVelocity)); //Set going to the left
 
             ball.yVelocity += player2Paddle.yVelocity/2; //Add y velocity based on player paddle's y velocity
@@ -223,25 +226,26 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         }
     }
 
-
+    //if a key is pressed, we will process it
     @Override
     public void keyPressed(KeyEvent e) {
+        //MENUS
         //Game over screen
         if(game_over) {
-            //Press space to restart game
+            //Check for enter to restart game
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                 main_menu = true; // go to main menu
-                pause_after_score = false;
+                pause_after_score = false; // Game is over, so don't pause
                 game_over = false; // no longer game over
 
                 scoreboard.reset(); //Reset scoreboard
 
-                soundPlayer.stopSound(); //Stop game ending music
+                soundPlayer.stopSound(); //Stop game ending music if it is playing to avoid overlapping sounds
             }
         } else if(main_menu || pause_after_score) {
             if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                 if(main_menu){
-                    soundPlayer.playSound(START_FILE);
+                    soundPlayer.playSound(START_FILE); //Play start music if after main menu
                 }
                 main_menu = false; // no longer in main menu
                 pause_after_score = false; // no longer in pause after score screen, we are in game
@@ -251,11 +255,13 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
                 ball.startBall();
             }
         }
+
+        // Send to paddles for processing
         player1Paddle.keyPressed(e);
         player2Paddle.keyPressed(e);
     }
 
-    //if a key is released,
+    //if a key is released, send it to the paddles for processing
     @Override
     public void keyReleased(KeyEvent e) {
         player1Paddle.keyReleased(e);
