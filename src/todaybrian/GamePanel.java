@@ -61,7 +61,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
         requestFocus(); //Make window the active window
 
-        soundPlayer.playSound(BOUNCE_FILE); //Play first sound to avoid delay
+        soundPlayer.playSound(BOUNCE_FILE); //Play the bounce sound to remove music lag
 
         //make this class run at the same time as other classes (without this each class would "pause" while another class runs). By using threading we can remove lag, and also allows us to do features like display timers in real time!
         gameThread = new Thread(this);
@@ -169,7 +169,6 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
         //Check for collision with walls, which means a player has scored
         if(ball.x < 0){ //Gone off the left side of screen
-
             scoreboard.addPoint(2); //Player 2 gets a point
 
             ball.reset(); //Reset position of ball
@@ -186,7 +185,6 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
             }
         } else if(ball.x > GAME_WIDTH - Ball.BALL_DIAMETER){
             scoreboard.addPoint(1); //Player 1 gets a point
-            pause_after_score = true; //Pause the game until players are ready
 
             ball.reset(); //Reset position of ball
             if(scoreboard.getPlayer1Score() == 5){ //Check if player 1 has won
@@ -236,6 +234,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
             //Check for enter to restart game
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                 main_menu = true; // go to main menu
+
                 pause_after_score = false; // Game is over, so don't pause
                 game_over = false; // no longer game over
 
