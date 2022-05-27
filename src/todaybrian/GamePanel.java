@@ -48,8 +48,8 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
     public GamePanel(){
         //Init objects in game
-        player1Paddle = new Paddle(8, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_W, KeyEvent.VK_S); //Create Player 1's controlled paddle, set location to left side of screen
-        player2Paddle = new Paddle(GAME_WIDTH-8-Paddle.PADDLE_WIDTH, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_UP, KeyEvent.VK_DOWN); //Create Player 2's controlled paddle, set location to right side of screen
+        player1Paddle = new Paddle(10, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_W, KeyEvent.VK_S); //Create Player 1's controlled paddle, set location to left side of screen
+        player2Paddle = new Paddle(GAME_WIDTH-10-Paddle.PADDLE_WIDTH, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_UP, KeyEvent.VK_DOWN); //Create Player 2's controlled paddle, set location to right side of screen
         ball = new Ball(GAME_WIDTH/2 - Ball.BALL_DIAMETER/2, GAME_HEIGHT/2 - Ball.BALL_DIAMETER/2); //create a ball object at the center of the screen which will bounce off the paddles and walls
         scoreboard = new Scoreboard(GAME_WIDTH); //start counting the score
 
@@ -168,7 +168,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         }
 
         //Check for collision with walls, which means a player has scored
-        if(ball.x < 0){ //Gone off the left side of screen
+        if(ball.x + Ball.BALL_DIAMETER< 0){ //Gone off the left side of screen
             scoreboard.addPoint(2); //Player 2 gets a point
 
             ball.reset(); //Reset position of ball
@@ -183,7 +183,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
                 soundPlayer.playSound(WIN_MATCH_FILE); //otherwise play sound of match win
                 pause_after_score = true; //Pause the game until players are ready
             }
-        } else if(ball.x > GAME_WIDTH - Ball.BALL_DIAMETER){
+        } else if(ball.x > GAME_WIDTH + Ball.BALL_DIAMETER){ //Gone off the right side of screen
             scoreboard.addPoint(1); //Player 1 gets a point
 
             ball.reset(); //Reset position of ball
