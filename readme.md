@@ -1,4 +1,8 @@
-# Pong!
+# Pong (with skill)!
+
+
+https://user-images.githubusercontent.com/13337661/170849622-7f007fd2-6844-4ad8-bc81-176dea01017a.mp4
+
 
 ## Controls
 
