@@ -9,7 +9,7 @@ import java.awt.event.KeyEvent;
 public class Paddle extends Rectangle {
 
     //Paddle dimension and speed constants
-    public static final int PADDLE_WIDTH = 1;
+    public static final int PADDLE_WIDTH = 10;
     public static final int PADDLE_HEIGHT = 80;
     public static final int PADDLE_SPEED = 8;
 
