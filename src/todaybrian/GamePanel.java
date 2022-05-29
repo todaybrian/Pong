@@ -23,6 +23,8 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     public Ball ball;
     public Scoreboard scoreboard;
 
+    private long lastCollision; //Store the last collision so we can check for a double collision
+
     //Sound System
     private SoundPlayer soundPlayer;
 
@@ -48,17 +50,17 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
     public GamePanel(){
         //Init objects in game
-        player1Paddle = new Paddle(10, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_W, KeyEvent.VK_S); //Create Player 1's controlled paddle, set location to left side of screen
-        player2Paddle = new Paddle(GAME_WIDTH-10-Paddle.PADDLE_WIDTH, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_UP, KeyEvent.VK_DOWN); //Create Player 2's controlled paddle, set location to right side of screen
+        player1Paddle = new Paddle(0, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_W, KeyEvent.VK_S); //Create Player 1's controlled paddle, set location to left side of screen
+        player2Paddle = new Paddle(GAME_WIDTH-Paddle.PADDLE_WIDTH, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_UP, KeyEvent.VK_DOWN); //Create Player 2's controlled paddle, set location to right side of screen
         ball = new Ball(GAME_WIDTH/2 - Ball.BALL_DIAMETER/2, GAME_HEIGHT/2 - Ball.BALL_DIAMETER/2); //create a ball object at the center of the screen which will bounce off the paddles and walls
         scoreboard = new Scoreboard(GAME_WIDTH); //start counting the score
 
         soundPlayer = new SoundPlayer(); //Sound System
 
+        setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
         setFocusable(true); //make everything in this class appear on the screen
         addKeyListener(this); //start listening for keyboard input
 
-        setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
         requestFocus(); //Make window the active window
 
         soundPlayer.playSound(BOUNCE_FILE); //Play the bounce sound to remove music lag
@@ -97,6 +99,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         draw(g2d); //update the positions of everything on the screen
 
         //dashed line in center
+        g2d.setColor(Color.white);
         g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0));
         g2d.drawLine(GAME_WIDTH/2, 0, GAME_WIDTH/2, GAME_HEIGHT);
 
@@ -111,6 +114,8 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         if(!main_menu && !pause_after_score && !game_over){ //Don't draw ball if there is a menu or game over
             ball.draw(g);
         }
+
+        Toolkit.getDefaultToolkit().sync(); //sync the screen with the computer
     }
 
     //call the move methods in other classes to update positions
@@ -125,31 +130,44 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     public void checkCollision() {
         //check for collision with top and bottom walls
         //collisions are done like this to avoid the ball from bouncing off the wall multiple times
-        if(ball.y < 0){ //top wall
-            ball.yVelocity = Math.abs(ball.yVelocity);
 
-            soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
-        } else if (ball.y > GAME_HEIGHT - Ball.BALL_DIAMETER){ //bottom wall
-            ball.yVelocity = -Math.abs(ball.yVelocity);
+        if (ball.y < 0) { //top wall
+            ball.setYVelocity(Math.abs(ball.yVelocity));
 
-            soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
+            if(System.nanoTime()-lastCollision > 50000000)
+                soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
+            lastCollision = System.nanoTime();
+        } else if (ball.y > GAME_HEIGHT - Ball.BALL_DIAMETER) { //bottom wall
+
+            ball.setYVelocity(-Math.abs(ball.yVelocity));
+
+            if(System.nanoTime()-lastCollision > 50000000) {
+                soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
+            }
+            lastCollision = System.nanoTime();
         }
 
         //check for collision with paddles
         //collisions are done like this to avoid the ball from bouncing off the paddle multiple times
-        if(ball.intersects(player1Paddle)){ //Bounced of player 1's paddle
+        if (ball.intersects(player1Paddle)) { //Bounced of player 1's paddle
             ball.setXVelocity(Math.abs(ball.xVelocity)); //Set going to the right
 
-            ball.yVelocity += player1Paddle.yVelocity/2; //Add y velocity based on player paddle's y velocity
+            ball.setYVelocity(ball.yVelocity + player1Paddle.yVelocity / 2); //Add y velocity based on player paddle's y velocity
 
-            soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
+            if(System.nanoTime()-lastCollision > 50000000) {
+                soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
+            }
+            lastCollision = System.nanoTime();
 
-        } else if(ball.intersects(player2Paddle)){ //Bounced of player 2's paddle
+        } else if (ball.intersects(player2Paddle)) { //Bounced of player 2's paddle
             ball.setXVelocity(-Math.abs(ball.xVelocity)); //Set going to the left
 
-            ball.yVelocity += player2Paddle.yVelocity/2; //Add y velocity based on player paddle's y velocity
+            ball.setYVelocity(ball.yVelocity + player2Paddle.yVelocity / 2); //Add y velocity based on player paddle's y velocity
 
-            soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
+            if(System.nanoTime()-lastCollision > 50000000) {
+                soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
+            }
+            lastCollision = System.nanoTime();
         }
 
         //stop paddles from going off screen
@@ -205,7 +223,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     public void run() {
         //the CPU runs our game code too quickly - we need to slow it down! The following lines of code "force" the computer to get stuck in a loop for short intervals between calling other methods to update the screen.
         long lastTime = System.nanoTime();
-        double amountOfTicks = 65;
+        double amountOfTicks = 120;
         double ns = 1000000000/amountOfTicks;
         double delta = 0;
         long now;

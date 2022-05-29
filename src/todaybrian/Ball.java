@@ -8,8 +8,9 @@ import java.awt.*;
 public class Ball extends Rectangle {
 
     //Ball dimension and speed constants
-    public static final int BALL_DIAMETER = 20;
-    public static final int INIT_BALL_SPEED = 6;
+    public static final int BALL_DIAMETER = 10;
+    public static final int INIT_BALL_SPEED = 3;
+    public static final int MAX_Y_BALL_SPEED = 3;
 
     //Ball x and y velocity
     public int xVelocity;
@@ -28,6 +29,9 @@ public class Ball extends Rectangle {
     //called whenever the movement of the ball changes in the y-direction (up/down)
     public void setYVelocity(int yVelocity) {
         this.yVelocity = yVelocity;
+        //if the ball is moving too fast in the y-direction, limit it to a maximum speed
+        this.yVelocity = Math.min(this.yVelocity, MAX_Y_BALL_SPEED);
+        this.yVelocity = Math.max(this.yVelocity, -MAX_Y_BALL_SPEED);
     }
 
     //called frequently from the GamePanel class
@@ -62,7 +66,7 @@ public class Ball extends Rectangle {
     //called frequently from the GamePanel class
     //draws the current location of the ball to the screen
     public void draw(Graphics g){
-        g.setColor(Color.WHITE);
+        g.setColor(Color.YELLOW);
         g.fillOval(x, y, BALL_DIAMETER, BALL_DIAMETER);
     }
 }
