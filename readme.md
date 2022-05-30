@@ -10,4 +10,6 @@ Player 1: `w` to move up, `s` to move down.
 
 Player 2: `↑` to move up, `↓` to move down.
 
-Game made for ICS4U.
+Game made for ICS4U. 
+
+The difference between this branch and `no_glitches` is that `no_glitches` add fixes to some glitches such as the ball hitting the edge of the paddle. 
