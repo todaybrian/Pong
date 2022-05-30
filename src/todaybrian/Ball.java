@@ -1,6 +1,7 @@
 //Brian Yan
 //May 25, 2022
 //This class represents the ball in the game.
+//
 package todaybrian;
 
 import java.awt.*;
@@ -41,6 +42,19 @@ public class Ball extends Rectangle {
         x += xVelocity;
     }
 
+    //Set X coordinate of ball
+    //used when ball hits a paddle to avoid ball getting stuck in paddle
+    //Setter method used here because in the future, it would be easier to incorporate multiplayer
+    public void setX(int x){
+        this.x = x;
+    }
+
+    //Set Y coordinate of ball to avoid ball getting stuck in wall
+    //used when ball hits a wall
+    public void setY(int y){
+        this.y = y;
+    }
+
     //called from the GamePanel class
     //Resets the ball to the center of the screen (like when a player scores) and sets the ball's x and y velocity to 0
     public void reset(){
@@ -66,7 +80,7 @@ public class Ball extends Rectangle {
     //called frequently from the GamePanel class
     //draws the current location of the ball to the screen
     public void draw(Graphics g){
-        g.setColor(Color.YELLOW);
-        g.fillOval(x, y, BALL_DIAMETER, BALL_DIAMETER);
+        g.setColor(Color.WHITE);
+        g.fillRect(x, y, BALL_DIAMETER, BALL_DIAMETER);
     }
 }

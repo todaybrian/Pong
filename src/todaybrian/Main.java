@@ -7,6 +7,7 @@ All it does is run the constructor in GameFrame class
 package todaybrian;
 
 public class Main {
+
     public static void main(String[] args) {
         new GameFrame();
     }

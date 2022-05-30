@@ -11,7 +11,13 @@ public class Scoreboard {
     private int player1Score;
     private int player2Score;
 
+    //Only GAME_WIDTH is needed because the scoreboard is always on the top of the screen near the center
     private static int GAME_WIDTH;
+
+    //Distance of scoreboard from top of screen
+    private static final int distanceFromTop = 40;
+    //Distance of scores from center of screen
+    private static final int distanceFromCenter = 50;
 
     public Scoreboard(int gameWidth) {
         player1Score = 0;
@@ -29,7 +35,7 @@ public class Scoreboard {
         }
     }
 
-    //Reset the scores to 0
+    //Reset the scores to 0, called when a game is over
     public void reset(){
         player1Score = 0;
         player2Score = 0;
@@ -50,13 +56,23 @@ public class Scoreboard {
     public void draw(Graphics g){
         g.setColor(Color.WHITE);
         g.setFont(new Font("Inconsolata", Font.BOLD, 40));
-        FontMetrics fm = g.getFontMetrics();
+        FontMetrics fm = g.getFontMetrics(); //get font metrics for the current font
 
         //Draw the scores
+        //Player 1 (left)
+        //Do math to center the score
+        int player1ScoreWidth = fm.stringWidth(String.valueOf(player1Score)); //width of player 1 score
 
-        //Player 1
-        g.drawString(player1Score + "", GAME_WIDTH/2-fm.stringWidth(String.valueOf(player1Score))-50, 40); //Set score to be on the left of the center
-        //Player 2
-        g.drawString(player2Score + "", GAME_WIDTH/2+50, 40); //Set score to be on the right of the center
+        //Move text to center of screen, then move to the left by the distance from center
+        int player1ScoreLoc = ((GAME_WIDTH / 2) - (player1ScoreWidth / 2)) - distanceFromCenter;
+        g.drawString(String.valueOf(player1Score), player1ScoreLoc, distanceFromTop); //Set score to be on the left of the center
+
+        //Player 2 (right)
+        //Do math to center the score
+        int player2ScoreWidth = fm.stringWidth(String.valueOf(player2Score)); //width of player 2 score
+
+        //Move text to center of screen, then move to the right by the distance from center
+        int player2ScoreLoc = ((GAME_WIDTH / 2) - (player2ScoreWidth / 2))  + distanceFromCenter;
+        g.drawString(String.valueOf(player2Score), player2ScoreLoc, distanceFromTop); //Set score to be on the right of the center
     }
 }

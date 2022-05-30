@@ -13,14 +13,14 @@ public class GameFrame extends JFrame {
     public GameFrame() {
         gamePanel = new GamePanel(); //run GamePanel constructor
 
-        add(gamePanel);
-        setTitle("Pong!"); //set title for frame
-        setResizable(false); //frame can't change size
-        setBackground(Color.BLACK);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //X button will stop program execution
-        pack(); //makes components fit in window - don't need to set JFrame size, as it will adjust accordingly
-        setVisible(true); //makes window visible to user
-        setLocationRelativeTo(null);//set window in middle of screen
+        this.add(gamePanel);
+        this.setTitle("Pong!"); //set title for frame
+        this.setResizable(false); //frame can't change size
+        this.setBackground(Color.BLACK);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //X button will stop program execution
+        this.pack(); //makes components fit in window - don't need to set JFrame size, as it will adjust accordingly
+        this.setVisible(true); //makes window visible to user
+        this.setLocationRelativeTo(null);//set window in middle of screen
 
     }
 }

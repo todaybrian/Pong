@@ -16,54 +16,54 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
     public Thread gameThread;
     public Image image;
-    public Graphics2D g2d;
+    public Graphics2D graphics2D;
 
     public Paddle player1Paddle;
     public Paddle player2Paddle;
     public Ball ball;
     public Scoreboard scoreboard;
 
-    private long lastCollision; //Store the last collision so we can check for a double collision
+    private CollisionType lastCollision; //Store the last collision so we can check for a double collision
 
     //Sound System
     private SoundPlayer soundPlayer;
 
     // Main Menu
-    private static final String MAIN_MENU_IMAGE = "src/assets/main_menu.png";
     private boolean main_menu = true;
 
     // Pause After Score
-    private static final String PAUSE_AFTER_SCORE_IMAGE = "src/assets/pause_after_score.png";
     private boolean pause_after_score = false;
 
     // Game Over
-    private static final String PLAYER_1_WINS_IMAGE = "src/assets/player_1_wins.png";
-    private static final String PLAYER_2_WINS_IMAGE = "src/assets/player_2_wins.png";
     private boolean game_over = false;
     private boolean player_1_wins = false;
 
-    //Sound Files
-    private static final String BOUNCE_FILE = "src/assets/bounce.wav";
-    private static final String START_FILE = "src/assets/start_game.wav";
-    private static final String WIN_MATCH_FILE = "src/assets/win_sound.wav";
-    private static final String END_FILE = "src/assets/end_music.wav";
-
     public GamePanel(){
         //Init objects in game
+
+        //Player 1's left side paddle. Moved using W and S keys. Initial location is at middle of screen.
         player1Paddle = new Paddle(0, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_W, KeyEvent.VK_S); //Create Player 1's controlled paddle, set location to left side of screen
+
+        //Player 2's right side paddle. Moved using Up and Down keys. Initial location is at middle of screen.
         player2Paddle = new Paddle(GAME_WIDTH-Paddle.PADDLE_WIDTH, GAME_HEIGHT/2 - Paddle.PADDLE_HEIGHT/2,KeyEvent.VK_UP, KeyEvent.VK_DOWN); //Create Player 2's controlled paddle, set location to right side of screen
+
+        //Create ball, initial location is center of screen
         ball = new Ball(GAME_WIDTH/2 - Ball.BALL_DIAMETER/2, GAME_HEIGHT/2 - Ball.BALL_DIAMETER/2); //create a ball object at the center of the screen which will bounce off the paddles and walls
+
+        //Create scoreboard, initial location is at top of screen
         scoreboard = new Scoreboard(GAME_WIDTH); //start counting the score
 
-        soundPlayer = new SoundPlayer(); //Sound System
 
-        setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
-        setFocusable(true); //make everything in this class appear on the screen
-        addKeyListener(this); //start listening for keyboard input
+        //Sound System
+        soundPlayer = new SoundPlayer();
 
-        requestFocus(); //Make window the active window
+        this.setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT)); //set the size of the window
+        this.setFocusable(true); //make everything in this class appear on the screen
+        this.addKeyListener(this); //start listening for keyboard input
 
-        soundPlayer.playSound(BOUNCE_FILE); //Play the bounce sound to remove music lag
+        this.requestFocus(); //Make window the active window
+
+        soundPlayer.playSound(Assets.BOUNCE_FILE); //Play the bounce sound to remove music lag
 
         //make this class run at the same time as other classes (without this each class would "pause" while another class runs). By using threading we can remove lag, and also allows us to do features like display timers in real time!
         gameThread = new Thread(this);
@@ -74,46 +74,61 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     public void paint(Graphics g){
         //we are using "double buffering" here - if we draw images directly onto the screen, it takes time and the human eye can actually notice flashes of lag as each pixel on the screen is drawn one at a time. Instead, we are going to draw images OFF the screen (outside dimensions of the frame), then simply move the image on screen as needed.
         image = createImage(GAME_WIDTH, GAME_HEIGHT); //draw off screen
-        g2d = (Graphics2D) image.getGraphics();
+        this.graphics2D = (Graphics2D) image.getGraphics();
 
-        g2d.setColor(Color.WHITE);
+        // Menus are drawn first, so that players can see the paddles and interact with them before the game starts
+        drawMenus(this.graphics2D); //draw the menus
 
-        // MENUS
-        //main menu
-        if(main_menu){
-            ImageIcon main_menu_image = new ImageIcon(MAIN_MENU_IMAGE);
-            g2d.drawImage(main_menu_image.getImage(), 0, 0, null); //Draw the main menu image on screen
-        } else if(pause_after_score){//pause after score until players are ready
-            ImageIcon pause_after_score_image = new ImageIcon(PAUSE_AFTER_SCORE_IMAGE);
-            g2d.drawImage(pause_after_score_image.getImage(), 0, 0, null); //Draw the pause after score image on screen
-        } else if(game_over){ //Game over
-            if(player_1_wins){
-                ImageIcon player_1_wins_image = new ImageIcon(PLAYER_1_WINS_IMAGE);
-                g2d.drawImage(player_1_wins_image.getImage(), 0, 0, null); //Draw the player 1 wins image on screen
-            }  else{
-                ImageIcon player_2_wins_image = new ImageIcon(PLAYER_2_WINS_IMAGE);
-                g2d.drawImage(player_2_wins_image.getImage(), 0, 0, null); //Draw the player 2 wins image on screen
-            }
-        }
-
-        draw(g2d); //update the positions of everything on the screen
-
-        //dashed line in center
-        g2d.setColor(Color.white);
-        g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0));
-        g2d.drawLine(GAME_WIDTH/2, 0, GAME_WIDTH/2, GAME_HEIGHT);
+        //update the positions of everything on the screen
+        draw(this.graphics2D);
 
         g.drawImage(image, 0, 0, this); //redraw everything on the screen
     }
 
-    //call the draw methods in each class to update positions as things move
-    public void draw(Graphics g){
-        player1Paddle.draw(g);
-        player2Paddle.draw(g);
-        scoreboard.draw(g);
-        if(!main_menu && !pause_after_score && !game_over){ //Don't draw ball if there is a menu or game over
-            ball.draw(g);
+    //drawMenus is a method that draws the menus on the screen
+    public void drawMenus(Graphics2D g2d){
+        // MENUS
+        if(main_menu){ //Main menu
+
+            ImageIcon main_menu_image = new ImageIcon(Assets.MAIN_MENU_IMAGE);
+            g2d.drawImage(main_menu_image.getImage(), 0, 0, null); //Draw the main menu image on screen
+
+        } else if(pause_after_score){//pause after score until players are ready
+
+            ImageIcon pause_after_score_image = new ImageIcon(Assets.PAUSE_AFTER_SCORE_IMAGE);
+            g2d.drawImage(pause_after_score_image.getImage(), 0, 0, null); //Draw the pause after score image on screen
+
+        } else if(game_over){ //Game over
+            if(player_1_wins){ //If player 1 wins
+
+                ImageIcon player_1_wins_image = new ImageIcon(Assets.PLAYER_1_WINS_IMAGE);
+                g2d.drawImage(player_1_wins_image.getImage(), 0, 0, null); //Draw the player 1 wins image on screen
+
+            }  else{ //Player 1 did not win, so player 2 wins
+
+                ImageIcon player_2_wins_image = new ImageIcon(Assets.PLAYER_2_WINS_IMAGE);
+                g2d.drawImage(player_2_wins_image.getImage(), 0, 0, null); //Draw the player 2 wins image on screen
+
+            }
         }
+    }
+
+    //call the draw methods in each class to update positions as things move
+    public void draw(Graphics2D g2d){
+        g2d.setColor(Color.WHITE); //Set initial color to white
+
+        //draw objects
+        player1Paddle.draw(g2d);
+        player2Paddle.draw(g2d);
+        scoreboard.draw(g2d);
+        if(!main_menu && !pause_after_score && !game_over){ //Don't draw ball if there is a menu or game over
+            ball.draw(g2d);
+        }
+
+        //draw dashed line in center
+        g2d.setColor(Color.white);
+        g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0));
+        g2d.drawLine(GAME_WIDTH/2, 0, GAME_WIDTH/2, GAME_HEIGHT);
 
         Toolkit.getDefaultToolkit().sync(); //sync the screen with the computer
     }
@@ -132,42 +147,55 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         //collisions are done like this to avoid the ball from bouncing off the wall multiple times
 
         if (ball.y < 0) { //top wall
-            ball.setYVelocity(Math.abs(ball.yVelocity));
+            ball.setYVelocity(Math.abs(ball.yVelocity)); //make the ball bounce off the wall downwards
+            ball.setY(0); //set the ball's y position to the top of the wall to avoid object clipping
 
-            if(System.nanoTime()-lastCollision > 50000000)
-                soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
-            lastCollision = System.nanoTime();
-        } else if (ball.y > GAME_HEIGHT - Ball.BALL_DIAMETER) { //bottom wall
-
-            ball.setYVelocity(-Math.abs(ball.yVelocity));
-
-            if(System.nanoTime()-lastCollision > 50000000) {
-                soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
+            if(ball.yVelocity == 0){ //ball is glitched, so set it to a random direction. This glitch is super rare.
+                ball.setYVelocity(1);
             }
-            lastCollision = System.nanoTime();
+
+            if(lastCollision != CollisionType.TOP_WALL){ // check if collision doesn't happen on top wall twice in a row. If it does, don't play sound since it's a glitch
+                soundPlayer.playSound(Assets.BOUNCE_FILE); //Bounce sound
+            }
+
+            lastCollision = CollisionType.TOP_WALL;
+        } else if (ball.y > GAME_HEIGHT - Ball.BALL_DIAMETER) { //bottom wall
+            ball.setYVelocity(-Math.abs(ball.yVelocity)); //make the ball bounce off the wall upwards
+            ball.setY(GAME_HEIGHT - Ball.BALL_DIAMETER); //set the ball's y position to the bottom of the wall to avoid object clipping
+
+            if(ball.yVelocity == 0){ //ball is glitched, so set it to a random direction. This glitch is super rare.
+                ball.setYVelocity(-1);
+            }
+
+            if(lastCollision != CollisionType.BOTTOM_WALL){ // check if collision doesn't happen on bottom wall twice in a row. If it does, don't play sound since it's a glitch
+                soundPlayer.playSound(Assets.BOUNCE_FILE); //Bounce sound
+            }
+
+            lastCollision = CollisionType.BOTTOM_WALL;
         }
 
         //check for collision with paddles
         //collisions are done like this to avoid the ball from bouncing off the paddle multiple times
         if (ball.intersects(player1Paddle)) { //Bounced of player 1's paddle
             ball.setXVelocity(Math.abs(ball.xVelocity)); //Set going to the right
+            ball.setX(player1Paddle.x + Paddle.PADDLE_WIDTH); //Set ball to be right of player 1's paddle
 
-            ball.setYVelocity(ball.yVelocity + player1Paddle.yVelocity / 2); //Add y velocity based on player paddle's y velocity
-
-            if(System.nanoTime()-lastCollision > 50000000) {
-                soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
+            if(lastCollision != CollisionType.PADDLE1){ //If this is the first time the ball has hit the paddle, play the bounce sound) {
+                ball.setYVelocity(ball.yVelocity + player1Paddle.yVelocity / 2); //Add y velocity based on player paddle's y velocity
+                soundPlayer.playSound(Assets.BOUNCE_FILE); //Bounce sound
             }
-            lastCollision = System.nanoTime();
 
+            lastCollision = CollisionType.PADDLE1;
         } else if (ball.intersects(player2Paddle)) { //Bounced of player 2's paddle
             ball.setXVelocity(-Math.abs(ball.xVelocity)); //Set going to the left
+            ball.setX(player2Paddle.x - Ball.BALL_DIAMETER); //Set ball to be left of player 2's paddle
 
-            ball.setYVelocity(ball.yVelocity + player2Paddle.yVelocity / 2); //Add y velocity based on player paddle's y velocity
-
-            if(System.nanoTime()-lastCollision > 50000000) {
-                soundPlayer.playSound(BOUNCE_FILE); //Bounce sound
+            if(lastCollision!=CollisionType.PADDLE2) { //if we haven't already bounced off the paddle
+                ball.setYVelocity(ball.yVelocity + player2Paddle.yVelocity / 2); //Add y velocity based on player paddle's y velocity
+                soundPlayer.playSound(Assets.BOUNCE_FILE); //Bounce sound
             }
-            lastCollision = System.nanoTime();
+
+            lastCollision = CollisionType.PADDLE2;
         }
 
         //stop paddles from going off screen
@@ -190,29 +218,34 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
             scoreboard.addPoint(2); //Player 2 gets a point
 
             ball.reset(); //Reset position of ball
+            lastCollision = null; //Reset last collision
 
             if(scoreboard.getPlayer2Score() == 5){ //Check if player 2 has won
                 player_1_wins = false; //Player 2 wins
 
                 game_over = true; //Game over
 
-                soundPlayer.playSound(END_FILE);
+                soundPlayer.playSound(Assets.GAME_OVER_FILE);
             } else{
-                soundPlayer.playSound(WIN_MATCH_FILE); //otherwise play sound of match win
+                soundPlayer.playSound(Assets.WIN_MATCH_FILE); //otherwise play sound of match win
+
                 pause_after_score = true; //Pause the game until players are ready
             }
         } else if(ball.x > GAME_WIDTH + Ball.BALL_DIAMETER){ //Gone off the right side of screen
             scoreboard.addPoint(1); //Player 1 gets a point
 
             ball.reset(); //Reset position of ball
+            lastCollision = null; //Reset last collision
+
             if(scoreboard.getPlayer1Score() == 5){ //Check if player 1 has won
                 player_1_wins = true; //Player 1 wins
 
                 game_over = true; //Game over
 
-                soundPlayer.playSound(END_FILE);
+                soundPlayer.playSound(Assets.GAME_OVER_FILE);
             } else{
-                soundPlayer.playSound(WIN_MATCH_FILE); //otherwise play sound of match win
+                soundPlayer.playSound(Assets.WIN_MATCH_FILE); //otherwise play sound of match win
+
                 pause_after_score = true; //Pause the game until players are ready
             }
         }
@@ -246,9 +279,8 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     //if a key is pressed, we will process it
     @Override
     public void keyPressed(KeyEvent e) {
-        //MENUS
-        //Game over screen
-        if(game_over) {
+        //Check MENUS
+        if(game_over) {//Game over screen
             //Check for enter to restart game
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                 main_menu = true; // go to main menu
@@ -258,12 +290,12 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
                 scoreboard.reset(); //Reset scoreboard
 
-                soundPlayer.stopSound(); //Stop game ending music if it is playing to avoid overlapping sounds
+                soundPlayer.stopSound(); //Stop game ending music if it is playing
             }
-        } else if(main_menu || pause_after_score) {
+        } else if(main_menu || pause_after_score) { //Both pause after score and main menu have the same actions, except main menu plays a sound
             if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                 if(main_menu){
-                    soundPlayer.playSound(START_FILE); //Play start music if after main menu
+                    soundPlayer.playSound(Assets.START_FILE); //Play start music if after main menu
                 }
                 main_menu = false; // no longer in main menu
                 pause_after_score = false; // no longer in pause after score screen, we are in game
