@@ -1,6 +1,10 @@
 //Brian Yan
 //May 25, 2022
 //Game Frame class which creates window and starts the game
+/* GameFrame class establishes the frame (window) for the game
+It is a child of JFrame because JFrame manages frames
+Runs the constructor in GamePanel class
+*/
 package todaybrian;
 
 import javax.swing.*;

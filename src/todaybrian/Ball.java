@@ -1,7 +1,12 @@
 //Brian Yan
 //May 25, 2022
 //This class represents the ball in the game.
-//
+/* Ball class defines behaviours for the ball
+
+child of Rectangle because that makes it easy to draw and check for collision
+
+In 2D GUI, basically everything is a rectangle even if it doesn't look like it!
+*/
 package todaybrian;
 
 import java.awt.*;
@@ -42,15 +47,16 @@ public class Ball extends Rectangle {
         x += xVelocity;
     }
 
+
     //Set X coordinate of ball
-    //used when ball hits a paddle to avoid ball getting stuck in paddle
+    //called when ball hits a paddle to avoid ball getting stuck in paddle
     //Setter method used here because in the future, it would be easier to incorporate multiplayer
     public void setX(int x){
         this.x = x;
     }
 
-    //Set Y coordinate of ball to avoid ball getting stuck in wall
-    //used when ball hits a wall
+    //Set Y coordinate of ball
+    //called when ball hits a wall to avoid ball getting stuck in wall
     public void setY(int y){
         this.y = y;
     }

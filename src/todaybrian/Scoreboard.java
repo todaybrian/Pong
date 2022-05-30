@@ -19,6 +19,7 @@ public class Scoreboard {
     //Distance of scores from center of screen
     private static final int distanceFromCenter = 50;
 
+    //constructor creates scoreboard. This scoreboard is displayed on the top of the screen near the center
     public Scoreboard(int gameWidth) {
         player1Score = 0;
         player2Score = 0;

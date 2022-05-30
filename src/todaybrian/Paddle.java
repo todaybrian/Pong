@@ -11,16 +11,16 @@ public class Paddle extends Rectangle {
     //Paddle dimension and speed constants
     public static final int PADDLE_WIDTH = 8;
     public static final int PADDLE_HEIGHT = 80;
-    public static final int PADDLE_SPEED = 5;
+    public static final int PADDLE_SPEED = 5; //movement speed of paddle
 
-    //Y velocity of the paddle
+    //Y velocity of the paddle, x position is always constant
     public int yVelocity;
 
     //Player Keys for Paddle (up and down)
     private final int upKey;
     private final int downKey;
 
-    // Constructor creates paddle at given location and sets player keys
+    // Constructor creates paddle at given location and sets player control keys
     public Paddle(int x, int y, int upKey, int downKey) {
         super(x, y, PADDLE_WIDTH, PADDLE_HEIGHT);
 
