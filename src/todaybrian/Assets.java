@@ -1,6 +1,6 @@
 //Brian Yan
 //May 25, 2022
-//Store asset locations
+//This class stores asset locations
 package todaybrian;
 
 public class Assets {
